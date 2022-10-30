@@ -170,3 +170,34 @@ if (!function_exists('is_valid_date')) {
 
     }
 }
+
+
+if (!function_exists('extract_int')) {
+    /**
+     * Extract int from string
+     *
+     * @param string $value
+     * @return int
+     */
+    function extract_int(string $value): int
+    {
+        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+    }
+}
+
+
+
+if (!function_exists('extract_numbers')) {
+    /**
+     * Extract int from string
+     *
+     * @param string $value
+     * @return array
+     */
+    function extract_numbers(string $value): array
+    {
+        preg_match_all('!\d+\.?\d+!', $value, $matches);
+
+        return $matches;
+    }
+}
