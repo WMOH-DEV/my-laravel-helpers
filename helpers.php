@@ -1,3 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+
+use App\Models\User;
+use Carbon\Exceptions\InvalidFormatException;
+
+if (!function_exists('user')) {
+    /**
+     * @return ?User
+     */
+    function user(): ?User
+    {
+        return auth()->user() ?? request()->user();
+    }
+}
+
+if (!function_exists('has_unique_values')) {
+    /**
+     * Check if the array has duplicates values or not.
+     *
+     * @param array $arr
+     * @return bool
+     */
+    function has_unique_values(array $arr): bool
+    {
+        return count($arr) === count(array_unique($arr));
+    }
+}
+
+
+if (!function_exists('trim_till')) {
+    /**
+     * pluck string.
+     *
+     * @param string $string
+     * @param string $stopNeedle
+     * @param string|null $startNeedle
+     * @return string
+     */
+    function trim_till(string $string, string $stopNeedle, ?string $startNeedle = null): string
+    {
+        $startPosition = is_null($startNeedle) ? 0 : strpos($string, $startNeedle);
+        return trim(substr($string, $startPosition, strpos($string, $stopNeedle)));
+    }
+}
+
 if (!function_exists('average')) {
     /**
      * Get the average of array elements
@@ -77,7 +125,7 @@ if (!function_exists('replace_keys')) {
 
     if (!function_exists('array_to_obj')) {
         /**
-         * Convert arrau to object.
+         * Convert array to object.
          *
          * @param array $array
          * @return object
