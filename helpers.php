@@ -5,6 +5,8 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Support\Collection as SupportCollection;
+
 
 if (!function_exists('user')) {
     /**
@@ -172,6 +174,74 @@ if (!function_exists('is_valid_date')) {
 }
 
 
+if (!function_exists('value_or_null')) {
+    /**
+     * get value data
+     *
+     */
+    function value_or_null(mixed $value, $unwantedValue)
+    {
+        return ($value == $unwantedValue) ? null : $value;
+    }
+}
+
+
+if (!function_exists('get_domain')) {
+    /**
+     * get the main domain from string
+     *
+     */
+    function get_domain(string $url)
+    {
+        $pieces = parse_url($url);
+        $domain = $pieces['host'] ?? '';
+        if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
+            return $regs['domain'];
+        }
+        return null;
+    }
+}
+
+
+if (!function_exists('is_web_file')) {
+    /**
+     * @param $file
+     * @return bool
+     */
+    function is_web_file($file): bool
+    {
+        $fp = @fopen($file, "r");
+        if ($fp !== false)
+            fclose($fp);
+
+        return (bool)($fp);
+    }
+}
+
+
+
+if (!function_exists('get_domain_name')) {
+    /**
+     * get the main domain from string
+     *
+     */
+    function get_domain_name(string $url)
+    {
+        $domain = get_domain($url);
+
+        if (is_null($domain))
+        {
+            return null;
+        }
+
+        if (preg_match('/(\w+)\./i', $domain, $regs)) {
+            return $regs[1];
+        }
+        return null;
+    }
+}
+
+
 if (!function_exists('extract_int')) {
     /**
      * Extract int from string
@@ -196,8 +266,93 @@ if (!function_exists('extract_numbers')) {
      */
     function extract_numbers(string $value): array
     {
-        preg_match_all('!\d+\.?\d+!', $value, $matches);
+        preg_match_all('!\d+[\.\-]?\d+!', $value, $matches);
+        // preg_match_all('!\d+\.?\d+!', $value, $matches);
 
         return $matches;
+    }
+}
+
+if (!function_exists('extract_number')) {
+    /**
+     * Extract int from string
+     *
+     * @param string $value
+     * @return string
+     */
+    function extract_number(string $value): string
+    {
+        preg_match('!\d+[\.\-]?\d*!', $value, $matches);
+        return $matches[0] ?? $value;
+    }
+}
+
+
+
+if (!function_exists('swap')) {
+    /**
+     * @param $a
+     * @param $b
+     * @return void
+     */
+    function swap(&$a, &$b): void
+    {
+        $temp = $a;
+        $a = $b;
+        $b = $temp;
+    }
+}
+
+
+if (!function_exists('dump_sql')) {
+    /**
+     * Returns sql query with bindings data.
+     *
+     * @param $builder
+     * @return array|mixed|string|string[]|null
+     */
+    function dump_sql($builder): mixed
+    {
+        $sql = $builder->toSql();
+        $bindings = $builder->getBindings();
+
+        array_walk($bindings, function ($value) use (&$sql) {
+            $value = is_string($value) ? var_export($value, true) : $value;
+            $sql = preg_replace("/\?/", $value, $sql, 1);
+        });
+        return $sql;
+    }
+}
+
+
+if (!function_exists('carbon')) {
+    /**
+     * Shortcut for: new Carbon or Carbon::parse()
+     *
+     * @param ...$args
+     * @return Carbon
+     */
+    function carbon(...$args): Carbon
+    {
+        return new Carbon(...$args);
+    }
+}
+
+
+
+if (!function_exists('recursive')) {
+    /**
+     * @param $values
+     * @return SupportCollection
+     */
+    function recursive($values): SupportCollection
+    {
+        return collect($values)->map(function($value){
+            if (is_array($value) || is_object($value)) {
+                return recursive($value);
+            }
+            return $value;
+        });
+
     }
 }
